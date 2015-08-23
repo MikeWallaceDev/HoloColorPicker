@@ -544,7 +544,7 @@ public class ColorPicker extends View {
 			// Here will be checked which we shall use.
 			if (mHSV[1] < mHSV[2]) {
 				mSVbar.setSaturation(mHSV[1]);
-			} else if(mHSV[1] > mHSV[2]){
+			} else {
 				mSVbar.setValue(mHSV[2]);
 			}
 		}
