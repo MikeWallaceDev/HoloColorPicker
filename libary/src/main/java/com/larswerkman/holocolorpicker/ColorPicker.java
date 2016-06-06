@@ -227,6 +227,11 @@ public class ColorPicker extends View {
 	 */
 	private ValueBar mValueBar = null;
 
+    /**
+     * {@code TemperatureBar} instance used to control the Temperature bar.
+     */
+     private TemperatureBar mTemperatureBar = null;
+
 	/**
 	 * {@code onColorChangedListener} instance of the onColorChangedListener
 	 */
@@ -562,7 +567,13 @@ public class ColorPicker extends View {
 		} else if (mValueBar != null) {
 			Color.colorToHSV(color, mHSV);
 			mValueBar.setValue(mHSV[2]);
-		}
+	    }
+
+        if (mTemperatureBar != null) {
+            Color.colorToHSV(color, mHSV);
+            mTemperatureBar.setColor(mColor);
+            mTemperatureBar.setTemperature(mHSV[1]);
+        }
         setNewCenterColor(color);
 	}
 
@@ -629,6 +640,9 @@ public class ColorPicker extends View {
 				if (mSaturationBar != null) {
 					mSaturationBar.setColor(mColor);
 				}
+				if (mTemperatureBar != null) {
+				    mTemperatureBar.setColor(mColor);
+				}
 				if (mSVbar != null) {
 					mSVbar.setColor(mColor);
 				}
@@ -658,6 +672,10 @@ public class ColorPicker extends View {
 				if (mSaturationBar != null) {
 					mColor = mSaturationBar.setColor(mColor);
 				}
+
+                if (mTemperatureBar != null) {
+                    mColor = mTemperatureBar.setColor(mColor);
+                }
 
 				if (mSVbar != null) {
 					mColor = mSVbar.setColor(mColor);
@@ -746,6 +764,13 @@ public class ColorPicker extends View {
 		mValueBar.setColor(mColor);
 	}
 
+
+    public void addTemperatureBar(TemperatureBar bar) {
+        mTemperatureBar = bar;
+        mTemperatureBar.setColorPicker(this);
+        mTemperatureBar.setColor(mColor);
+    }
+
 	/**
 	 * Change the color of the center which indicates the new color.
 	 * 
@@ -820,6 +845,20 @@ public class ColorPicker extends View {
 		return color;
 	}
 
+
+	/**
+	 * Used to change the color of the {@code TemperatureBar}.
+	 * 
+	 * @param color
+	 *            int of the color used to change the temperature bar color.
+	 */
+	public int changeTemperatureBarColor(int color) {
+		if (mTemperatureBar != null) {
+			return mTemperatureBar.setColor(color);
+		}
+		return color;
+	}
+
 	/**
 	 * Used to change the color of the {@code ValueBar}.
 	 * 
@@ -857,6 +896,15 @@ public class ColorPicker extends View {
 	 */
 	public boolean hasSaturationBar(){
 		return mSaturationBar != null;
+	}
+
+	/**
+	 * Checks if there is a {@code TemperatureBar} connected.
+	 * 
+	 * @return true or false.
+	 */
+	public boolean hasTemperatureBar(){
+		return mTemperatureBar != null;
 	}
 	
 	/**

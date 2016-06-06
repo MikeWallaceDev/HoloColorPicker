@@ -31,8 +31,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.larswerkman.holocolorpicker.R;
-
 public class TemperatureBar extends View {
 
 	/*
@@ -42,7 +40,7 @@ public class TemperatureBar extends View {
 	private static final String STATE_COLOR = "color";
 	private static final String STATE_TEMPERATURE = "temperature";
 	private static final String STATE_ORIENTATION = "orientation";
-	
+
 	/**
 	 * Constants used to identify orientation.
 	 */
@@ -108,7 +106,7 @@ public class TemperatureBar extends View {
 	/**
 	 * {@code true} if the user clicked on the pointer to start the move mode. <br>
 	 * {@code false} once the user stops touching the screen.
-	 * 
+	 *
 	 * @see #onTouchEvent(android.view.MotionEvent)
 	 */
 	private boolean mIsMovingPointer;
@@ -127,12 +125,12 @@ public class TemperatureBar extends View {
 	/**
 	 * Factor used to calculate the position to the Opacity on the bar.
 	 */
-	private float mPosToSatFactor;
+	private float mPosToTempFactor;
 
 	/**
 	 * Factor used to calculate the Opacity to the postion on the bar.
 	 */
-	private float mSatToPosFactor;
+	private float mTempToPosFactor;
 
 	/**
 	 * {@code ColorPicker} instance used to control the ColorPicker.
@@ -143,13 +141,13 @@ public class TemperatureBar extends View {
 	 * Used to toggle orientation between vertical and horizontal.
 	 */
 	private boolean mOrientation;
-	
+
     /**
      * Interface and listener so that changes in TemperatureBar are sent
      * to the host activity/fragment
      */
     private OnTemperatureChangedListener onTemperatureChangedListener;
-    
+
 	/**
 	 * Temperature of the latest entry of the onTemperatureChangedListener.
 	 */
@@ -216,8 +214,8 @@ public class TemperatureBar extends View {
 		mBarPointerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mBarPointerPaint.setColor(0xff81ff00);
 
-		mPosToSatFactor = 1 / ((float) mBarLength);
-		mSatToPosFactor = ((float) mBarLength) / 1;
+		mPosToTempFactor = 1 / ((float) mBarLength);
+		mTempToPosFactor = ((float) mBarLength) / 1;
 	}
 
 	@Override
@@ -297,16 +295,16 @@ public class TemperatureBar extends View {
 							Color.WHITE, 0xff81ff00 }, null, Shader.TileMode.CLAMP);
 			Color.colorToHSV(0xff81ff00, mHSVColor);
 		}
-		
+
 		mBarPaint.setShader(shader);
-		mPosToSatFactor = 1 / ((float) mBarLength);
-		mSatToPosFactor = ((float) mBarLength) / 1;
-		
+		mPosToTempFactor = 1 / ((float) mBarLength);
+		mTempToPosFactor = ((float) mBarLength) / 1;
+
 		float[] hsvColor = new float[3];
 		Color.colorToHSV(mColor, hsvColor);
-		
+
 		if (!isInEditMode()){
-			mBarPointerPosition = Math.round((mSatToPosFactor * hsvColor[1])
+			mBarPointerPosition = Math.round((mTempToPosFactor * hsvColor[1])
 					+ mBarPointerHaloRadius);
 		} else {
 			mBarPointerPosition = mBarLength + mBarPointerHaloRadius;
@@ -328,7 +326,7 @@ public class TemperatureBar extends View {
 			cX = mBarPointerHaloRadius;
 			cY = mBarPointerPosition;
 		}
-		
+
 		// Draw the pointer halo.
 		canvas.drawCircle(cX, cY, mBarPointerHaloRadius, mBarPointerHaloPaint);
 		// Draw the pointer.
@@ -412,7 +410,7 @@ public class TemperatureBar extends View {
 	 * Set the bar color. <br>
 	 * <br>
 	 * Its discouraged to use this method.
-	 * 
+	 *
 	 * @param color
 	 */
 	public int setColor(int color) {
@@ -425,7 +423,7 @@ public class TemperatureBar extends View {
 			x1 = mBarThickness;
 			y1 = (mBarLength + mBarPointerHaloRadius);
 		}
-		
+
 		Color.colorToHSV(color, mHSVColor);
 		shader = new LinearGradient(mBarPointerHaloRadius, 0,
 				x1, y1, new int[] {
@@ -440,11 +438,11 @@ public class TemperatureBar extends View {
 
 	/**
 	 * Set the pointer on the bar. With the opacity value.
-	 * 
+	 *
 	 * @param temperature float between 0 and 1
 	 */
 	public void setTemperature(float temperature) {
-		mBarPointerPosition = Math.round((mSatToPosFactor * temperature))
+		mBarPointerPosition = Math.round((mTempToPosFactor * temperature))
 				+ mBarPointerHaloRadius;
 		calculateColor(mBarPointerPosition);
 		mBarPointerPaint.setColor(mColor);
@@ -459,7 +457,7 @@ public class TemperatureBar extends View {
 
         /**
          * Calculate the color selected by the pointer on the bar.
-         * 
+         *
          * @param coord Coordinate of the pointer.
          */
 	private void calculateColor(int coord) {
@@ -470,12 +468,12 @@ public class TemperatureBar extends View {
 	    	coord = mBarLength;
 	    }
 	    mColor = Color.HSVToColor(
-                new float[] { mHSVColor[0],(mPosToSatFactor * coord),1f });
+                new float[] { mHSVColor[0],(mPosToTempFactor * coord),1f });
     }
 
 	/**
 	 * Get the currently selected color.
-	 * 
+	 *
 	 * @return The ARGB value of the currently selected color.
 	 */
 	public int getColor() {
@@ -487,7 +485,7 @@ public class TemperatureBar extends View {
 	 * <br>
 	 * WARNING: Don't change the color picker. it is done already when the bar
 	 * is added to the ColorPicker
-	 * 
+	 *
 	 * @see com.larswerkman.holocolorpicker.ColorPicker#addSVBar(SVBar)
 	 * @param picker
 	 */
@@ -502,7 +500,7 @@ public class TemperatureBar extends View {
 		Bundle state = new Bundle();
 		state.putParcelable(STATE_PARENT, superState);
 		state.putFloatArray(STATE_COLOR, mHSVColor);
-		
+
 		float[] hsvColor = new float[3];
 		Color.colorToHSV(mColor, hsvColor);
 		state.putFloat(STATE_TEMPERATURE, hsvColor[1]);
