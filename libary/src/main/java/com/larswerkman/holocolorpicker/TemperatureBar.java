@@ -219,8 +219,8 @@ public class TemperatureBar extends View {
 		mBarPointerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mBarPointerPaint.setColor(0xff81ff00);
 
-		mPosToTempFactor = 1 / ((float) mBarLength);
-		mTempToPosFactor = ((float) mBarLength) / 1;
+		mPosToTempFactor = 9000 / ((float) mBarLength);
+		mTempToPosFactor = ((float) mBarLength) / 9000;
 	}
 
 	@Override
@@ -302,8 +302,8 @@ public class TemperatureBar extends View {
 		}
 
 		mBarPaint.setShader(shader);
-		mPosToTempFactor = 1 / ((float) mBarLength);
-		mTempToPosFactor = ((float) mBarLength) / 1;
+		mPosToTempFactor = 9000 / ((float) mBarLength);
+		mTempToPosFactor = ((float) mBarLength) / 9000;
 
 		float[] hsvColor = new float[3];
 		Color.colorToHSV(mColor, hsvColor);
@@ -450,6 +450,7 @@ public class TemperatureBar extends View {
 		mBarPointerPosition = Math.round((mTempToPosFactor * temperature))
 				+ mBarPointerHaloRadius;
 		calculateColor(mBarPointerPosition);
+        //mColor = temperatureToColor(mBarPointerPosition);
 		mBarPointerPaint.setColor(mColor);
 
 		if (mPicker != null) {
@@ -473,8 +474,9 @@ public class TemperatureBar extends View {
 	    } else if (coord > mBarLength) {
 	    	coord = mBarLength;
 	    }
-	    mColor = Color.HSVToColor(
-                new float[] { mHSVColor[0],(mPosToTempFactor * coord),1f });
+	    //mColor = Color.HSVToColor(
+                //new float[] { mHSVColor[0],(mPosToTempFactor * coord),1f });
+        mColor = temperatureToColor((int)(mPosToTempFactor * coord));
     }
 
 	private int clamp(int x, int min, int max) {
