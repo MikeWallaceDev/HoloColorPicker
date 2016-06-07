@@ -117,6 +117,11 @@ public class TemperatureBar extends View {
 	private int mColor;
 
 	/**
+	 * The value of the currently selected temperature in Kelvin.
+	 */
+	private int mKelvin;
+
+	/**
 	 * An array of floats that can be build into a {@code Color} <br>
 	 * Where we can extract the color from.
 	 */
@@ -286,14 +291,14 @@ public class TemperatureBar extends View {
 		if (!isInEditMode()){
 			shader = new LinearGradient(mBarPointerHaloRadius, 0,
 					x1, y1, new int[] {
-							Color.WHITE,
-							Color.HSVToColor(0xFF, mHSVColor) }, null,
+							temperatureToColor(3500),
+							temperatureToColor(9000) }, null,
 					Shader.TileMode.CLAMP);
 		} else {
 			shader = new LinearGradient(mBarPointerHaloRadius, 0,
 					x1, y1, new int[] {
-							Color.WHITE, 0xff81ff00 }, null, Shader.TileMode.CLAMP);
-			Color.colorToHSV(0xff81ff00, mHSVColor);
+							temperatureToColor(3500), temperatureToColor(9000) }, null, Shader.TileMode.CLAMP);
+			Color.colorToHSV(temperatureToColor(9000), mHSVColor);
 		}
 
 		mBarPaint.setShader(shader);
@@ -427,7 +432,7 @@ public class TemperatureBar extends View {
 		Color.colorToHSV(color, mHSVColor);
 		shader = new LinearGradient(mBarPointerHaloRadius, 0,
 				x1, y1, new int[] {
-						Color.WHITE, color }, null,
+						temperatureToColor(3500), color }, null,
 				Shader.TileMode.CLAMP);
 		mBarPaint.setShader(shader);
 		calculateColor(mBarPointerPosition);
@@ -450,6 +455,7 @@ public class TemperatureBar extends View {
 		if (mPicker != null) {
 			mColor = mPicker.changeValueBarColor(mColor);
 			mColor = mPicker.changeOpacityBarColor(mColor);
+			mColor = mPicker.changeSaturationBarColor(mColor);
 			mPicker.setNewCenterColor(mColor);
 		}
 		invalidate();
@@ -470,6 +476,54 @@ public class TemperatureBar extends View {
 	    mColor = Color.HSVToColor(
                 new float[] { mHSVColor[0],(mPosToTempFactor * coord),1f });
     }
+
+	private int clamp(int x, int min, int max) {
+		if (x<min)
+			return min;
+		if (x>max)
+			return max;
+		return x;
+	}
+
+	/**
+	 * Calculate the color based on the selected temperature in Kelvin.
+	 *
+	 * @param temperature Temperature in Kelvin.
+	 */
+	private int temperatureToColor(int temperature) {
+		int temp = temperature / 100;
+		int tRed;
+		int tGrn;
+		int tBlu;
+
+		if (temp <= 66) {
+			tRed = 255;
+			tGrn = temp;
+			tGrn = ((int) Math.round(99.4708025861 * Math.log(tGrn) - 161.1195681661));
+
+			if (temp <= 19) {
+				tBlu = 0;
+			} else {
+				tBlu = temp-10;
+				tBlu = ((int) Math.round(138.5177312231 * Math.log(tBlu) - 305.0447927307));
+			}
+		} else {
+			tRed = temp - 60;
+			tRed = ((int) Math.round(329.698727446 * Math.pow(tRed, -0.1332047592)));
+
+			tGrn = temp - 60;
+			tGrn = ((int) Math.round(288.1221695283 * Math.pow(tGrn, -0.0755148492)));
+
+			tBlu = 255;
+		}
+
+		int r = clamp(tRed, 0, 255);
+		int g = clamp(tGrn, 0, 255);
+		int b = clamp(tBlu, 0, 255);
+		float[] tHSV = new float[3];
+		Color.RGBToHSV(r, g, b, tHSV);
+		return Color.HSVToColor(tHSV);
+	}
 
 	/**
 	 * Get the currently selected color.
